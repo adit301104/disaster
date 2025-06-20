@@ -2,7 +2,7 @@ services:
   - type: web
     name: dis-frontend
     env: static
-    buildCommand: cd frontend/dis && npm install && npm run build
+    buildCommand: npm install && npm run build
     staticPublishPath: frontend/dis/dist
     routes:
       - type: rewrite

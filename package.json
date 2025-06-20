@@ -8,7 +8,8 @@
     "install:all": "npm run install:frontend && npm run install:backend",
     "build:frontend": "cd frontend/dis && npm install && npx vite build",
     "build:backend": "cd backend && npm install",
-    "build": "npm run build:frontend && npm run build:backend",
+    "build": "bash build.sh",
+    "build:fallback": "cd frontend/dis && npm install && npm run build",
     "start:frontend": "cd frontend/dis && npm run dev",
     "start:backend": "cd backend && npm start",
     "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
