@@ -12,12 +12,15 @@ const server = http.createServer(app);
 const io = socketIo(server, { 
   cors: { 
     origin: process.env.ALLOWED_ORIGINS?.split(',') || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"]
-  } 
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  },
+  transports: ['websocket', 'polling']
 });
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || "*"
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || "*",
+  credentials: true
 }));
 app.use(express.json({ limit: process.env.MAX_REQUEST_SIZE || '10mb' }));
 

@@ -7,16 +7,32 @@ const SOCKET_URL = import.meta.env.VITE_API_URL;
 
 // Utility function for API calls
 const apiCall = async (endpoint, options = {}) => {
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: {
-      'Content-Type': 'application/json',
-      'x-user-id': 'netrunnerX',
-      ...options.headers,
-    },
-    ...options,
-  });
-  if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
-  return response.json();
+  console.log(`API Call: ${API_BASE}${endpoint}`, options);
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': 'netrunnerX',
+        ...options.headers,
+      },
+      ...options,
+    });
+    
+    console.log(`API Response: ${response.status} ${response.statusText}`);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
+      throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log(`API Data:`, data);
+    return data;
+  } catch (error) {
+    console.error('API Call failed:', error);
+    throw error;
+  }
 };
 
 // Main App Component
@@ -32,13 +48,37 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
+  const [socketConnected, setSocketConnected] = useState(false);
   const socketRef = useRef(null);
 
   // Socket connection and event handlers
   useEffect(() => {
-    socketRef.current = io(SOCKET_URL);
+    console.log('Connecting to socket:', SOCKET_URL);
+    socketRef.current = io(SOCKET_URL, {
+      transports: ['websocket', 'polling'],
+      withCredentials: true,
+      timeout: 20000
+    });
+    
+    socketRef.current.on('connect', () => {
+      console.log('Socket connected:', socketRef.current.id);
+      setSocketConnected(true);
+      addNotification('Connected to real-time updates', 'success');
+    });
+
+    socketRef.current.on('disconnect', () => {
+      console.log('Socket disconnected');
+      setSocketConnected(false);
+      addNotification('Disconnected from real-time updates', 'warning');
+    });
+
+    socketRef.current.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+      addNotification('Failed to connect to real-time updates', 'error');
+    });
     
     socketRef.current.on('disaster_updated', (data) => {
+      console.log('Disaster updated:', data);
       if (data.action === 'create') {
         setDisasters(prev => [data.disaster, ...prev]);
         addNotification('New disaster reported', 'info');
@@ -49,13 +89,22 @@ const App = () => {
     });
 
     socketRef.current.on('social_media_updated', (data) => {
+      console.log('Social media updated:', data);
       if (selectedDisaster?.id === data.disaster_id) {
         setSocialMedia(data.data);
         addNotification('Social media updated', 'success');
       }
     });
 
+    socketRef.current.on('official_updates_updated', (data) => {
+      console.log('Official updates received:', data);
+      if (selectedDisaster?.id === data.disaster_id) {
+        addNotification('Official updates received', 'info');
+      }
+    });
+
     socketRef.current.on('report_created', (data) => {
+      console.log('Report created:', data);
       if (selectedDisaster?.id === data.disaster_id) {
         setReports(prev => [data.report, ...prev]);
         addNotification('New report received', 'warning');
@@ -63,11 +112,15 @@ const App = () => {
     });
 
     socketRef.current.on('emergency_alert', (data) => {
+      console.log('Emergency alert:', data);
       addNotification(`EMERGENCY: ${data.message}`, 'error');
     });
 
-    return () => socketRef.current?.disconnect();
-  }, [selectedDisaster?.id]);
+    return () => {
+      console.log('Disconnecting socket');
+      socketRef.current?.disconnect();
+    };
+  }, []);
 
   // Load disasters on mount
   useEffect(() => {
@@ -105,21 +158,45 @@ const App = () => {
   const loadDisasterDetails = async (id) => {
     try {
       setLoading(true);
+      console.log('Loading disaster details for:', id);
+      
       const [socialData, resourcesData, reportsData, analyticsData] = await Promise.all([
-        apiCall(`/disasters/${id}/social-media`).catch(() => []),
-        apiCall(`/disasters/${id}/resources`).catch(() => []),
-        apiCall(`/disasters/${id}/reports`).catch(() => []),
-        apiCall(`/disasters/${id}/analytics`).catch(() => null)
+        apiCall(`/disasters/${id}/social-media`).catch((err) => {
+          console.error('Social media error:', err);
+          return [];
+        }),
+        apiCall(`/disasters/${id}/resources`).catch((err) => {
+          console.error('Resources error:', err);
+          return [];
+        }),
+        apiCall(`/disasters/${id}/reports`).catch((err) => {
+          console.error('Reports error:', err);
+          return [];
+        }),
+        apiCall(`/disasters/${id}/analytics`).catch((err) => {
+          console.error('Analytics error:', err);
+          return null;
+        })
       ]);
+      
+      console.log('Loaded data:', { socialData, resourcesData, reportsData, analyticsData });
       
       setSocialMedia(socialData);
       setResources(resourcesData);
       setReports(reportsData);
       setAnalytics(analyticsData);
     } catch (error) {
+      console.error('Load disaster details error:', error);
       addNotification('Failed to load disaster details', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshData = async () => {
+    if (selectedDisaster) {
+      addNotification('Refreshing data...', 'info');
+      await loadDisasterDetails(selectedDisaster.id);
     }
   };
 
@@ -202,8 +279,24 @@ const App = () => {
             <Shield className="w-6 h-6 text-blue-400" />
             Disaster Response Hub
           </h1>
+          <div className="ml-4 flex items-center gap-2">
+            <div className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+            <span className="text-xs text-gray-300">
+              {socketConnected ? 'Live' : 'Offline'}
+            </span>
+          </div>
         </div>
         <div className="navbar-end gap-2">
+          {selectedDisaster && (
+            <button 
+              className="btn btn-ghost btn-sm"
+              onClick={refreshData}
+              disabled={loading}
+            >
+              <Activity className="w-4 h-4" />
+              {loading ? 'Loading...' : 'Refresh'}
+            </button>
+          )}
           <button 
             className="btn btn-primary btn-sm"
             onClick={() => setShowCreateForm(true)}
