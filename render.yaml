@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: dis-frontend
+    env: static
+    buildCommand: cd frontend/dis && npm install && npm run build
+    staticPublishPath: frontend/dis/dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+  
+  - type: web
+    name: dis-backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production

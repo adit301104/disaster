@@ -1,0 +1,19 @@
+{
+  "name": "dis-monorepo",
+  "version": "1.0.0",
+  "description": "Full-stack application with React frontend and Node.js backend",
+  "scripts": {
+    "install:frontend": "cd frontend/dis && npm install",
+    "install:backend": "cd backend && npm install",
+    "install:all": "npm run install:frontend && npm run install:backend",
+    "build:frontend": "cd frontend/dis && npm install && npx vite build",
+    "build:backend": "cd backend && npm install",
+    "build": "npm run build:frontend && npm run build:backend",
+    "start:frontend": "cd frontend/dis && npm run dev",
+    "start:backend": "cd backend && npm start",
+    "dev": "concurrently \"npm run start:backend\" \"npm run start:frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
