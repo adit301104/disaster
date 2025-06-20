@@ -10,16 +10,22 @@ require('dotenv').config();
 const app = express();
 const server = http.createServer(app);
 // Configure allowed origins
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
-  : [
-      "http://localhost:3000",
-      "http://localhost:5173", 
-      "http://localhost:8080",
-      "https://disaster-frontend-n1cn.onrender.com"
-    ];
+console.log('Environment ALLOWED_ORIGINS:', process.env.ALLOWED_ORIGINS);
+console.log('All environment variables:', Object.keys(process.env).filter(key => key.includes('ALLOWED')));
 
-console.log('Allowed CORS origins:', allowedOrigins);
+// Force include the frontend domain for production
+const defaultOrigins = [
+  "http://localhost:3000",
+  "http://localhost:5173", 
+  "http://localhost:8080",
+  "https://disaster-frontend-n1cn.onrender.com"
+];
+
+const allowedOrigins = process.env.ALLOWED_ORIGINS 
+  ? [...new Set([...process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()), ...defaultOrigins])]
+  : defaultOrigins;
+
+console.log('Final CORS origins:', allowedOrigins);
 
 const io = socketIo(server, { 
   cors: { 
@@ -48,8 +54,20 @@ app.use(cors({
   allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
 }));
 
-// Handle preflight requests
-app.options('*', cors());
+// Handle preflight requests - simplified
+app.use((req, res, next) => {
+  if (req.method === 'OPTIONS') {
+    const origin = req.get('Origin');
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-user-id');
+    }
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 // Debug middleware
 app.use((req, res, next) => {
