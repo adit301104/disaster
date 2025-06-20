@@ -36,7 +36,7 @@ const App = () => {
 
   // Socket connection and event handlers
   useEffect(() => {
-add     console.log('Connecting to socket:', SOCKET_URL);
+    console.log('Connecting to socket:', SOCKET_URL);
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       withCredentials: true,
