@@ -7,32 +7,16 @@ const SOCKET_URL = import.meta.env.VITE_API_URL;
 
 // Utility function for API calls
 const apiCall = async (endpoint, options = {}) => {
-  console.log(`API Call: ${API_BASE}${endpoint}`, options);
-  try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-user-id': 'netrunnerX',
-        ...options.headers,
-      },
-      ...options,
-    });
-    
-    console.log(`API Response: ${response.status} ${response.statusText}`);
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error: ${response.status} ${response.statusText}`, errorText);
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log(`API Data:`, data);
-    return data;
-  } catch (error) {
-    console.error('API Call failed:', error);
-    throw error;
-  }
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': 'netrunnerX',
+      ...options.headers,
+    },
+    ...options,
+  });
+  if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+  return response.json();
 };
 
 // Main App Component
@@ -48,12 +32,11 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showReportForm, setShowReportForm] = useState(false);
-  const [socketConnected, setSocketConnected] = useState(false);
   const socketRef = useRef(null);
 
   // Socket connection and event handlers
   useEffect(() => {
-    console.log('Connecting to socket:', SOCKET_URL);
+add     console.log('Connecting to socket:', SOCKET_URL);
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       withCredentials: true,
@@ -62,13 +45,11 @@ const App = () => {
     
     socketRef.current.on('connect', () => {
       console.log('Socket connected:', socketRef.current.id);
-      setSocketConnected(true);
       addNotification('Connected to real-time updates', 'success');
     });
 
     socketRef.current.on('disconnect', () => {
       console.log('Socket disconnected');
-      setSocketConnected(false);
       addNotification('Disconnected from real-time updates', 'warning');
     });
 
@@ -279,12 +260,6 @@ const App = () => {
             <Shield className="w-6 h-6 text-blue-400" />
             Disaster Response Hub
           </h1>
-          <div className="ml-4 flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
-            <span className="text-xs text-gray-300">
-              {socketConnected ? 'Live' : 'Offline'}
-            </span>
-          </div>
         </div>
         <div className="navbar-end gap-2">
           {selectedDisaster && (

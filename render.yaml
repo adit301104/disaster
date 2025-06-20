@@ -17,3 +17,5 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: ALLOWED_ORIGINS
+        value: https://disaster-frontend-n1cn.onrender.com,http://localhost:3000,http://localhost:5173

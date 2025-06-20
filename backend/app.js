@@ -9,19 +9,69 @@ require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
+// Configure allowed origins
+const allowedOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [
+  "http://localhost:3000",
+  "http://localhost:5173", 
+  "http://localhost:8080",
+  "https://disaster-frontend-n1cn.onrender.com"
+];
+
+console.log('Allowed CORS origins:', allowedOrigins);
+
 const io = socketIo(server, { 
   cors: { 
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || "*",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
   },
   transports: ['websocket', 'polling']
 });
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS?.split(',') || "*",
-  credentials: true
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || allowedOrigins.includes("*")) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "x-user-id"]
 }));
+
+// Handle preflight requests
+app.options('*', cors());
+
+// Debug middleware
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path} - Origin: ${req.get('Origin') || 'none'}`);
+  next();
+});
+
+// Manual CORS headers as fallback
+app.use((req, res, next) => {
+  const origin = req.get('Origin');
+  if (origin && allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-user-id');
+  }
+  
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
+
 app.use(express.json({ limit: process.env.MAX_REQUEST_SIZE || '10mb' }));
 
 // Initialize Supabase client
@@ -1012,6 +1062,16 @@ app.get('/health', (req, res) => {
       // twitter removed
       bluesky: !!(process.env.BLUESKY_IDENTIFIER && process.env.BLUESKY_PASSWORD)
     }
+  });
+});
+
+// CORS test endpoint
+app.get('/cors-test', (req, res) => {
+  res.json({
+    message: 'CORS is working!',
+    origin: req.get('Origin'),
+    timestamp: new Date().toISOString(),
+    allowedOrigins: allowedOrigins
   });
 });
 
