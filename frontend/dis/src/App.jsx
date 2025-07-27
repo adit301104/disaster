@@ -93,6 +93,7 @@ const App = ({ hideHeader = false }) => {
   const [socketConnected, setSocketConnected] = useState(false);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
   const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' or 'ai-demo'
+  const [searchQuery, setSearchQuery] = useState('');
   const socketRef = useRef(null);
 
   // Socket connection and event handlers
@@ -353,6 +354,10 @@ const App = ({ hideHeader = false }) => {
     return `${minutes}m ago`;
   };
 
+  const filteredDisasters = disasters.filter(disaster => 
+    disaster.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900 relative overflow-hidden">
       {/* Animated background elements */}
@@ -459,6 +464,8 @@ const App = ({ hideHeader = false }) => {
                       type="text" 
                       placeholder="Search events..." 
                       className="input input-bordered input-sm w-full bg-black/40 border-purple-500/40 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300 backdrop-blur-sm"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
                     />
                     <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 transition-colors duration-300">
                       <HiSearch className="w-4 h-4" />
@@ -468,7 +475,7 @@ const App = ({ hideHeader = false }) => {
               </div>
 
               <div className="space-y-4">
-                {disasters.map(disaster => (
+                {filteredDisasters.map(disaster => (
                   <div 
                     key={disaster.id}
                     className={`card bg-black/40 cursor-pointer transition-all duration-300 hover:bg-black/60 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 border backdrop-blur-sm ${
