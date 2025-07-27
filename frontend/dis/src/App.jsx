@@ -374,62 +374,71 @@ const App = ({ hideHeader = false }) => {
       <div className="navbar bg-black/40 backdrop-blur-2xl border-b border-purple-500/30 shadow-2xl relative z-10">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-violet-900/20"></div>
         <div className="navbar-start relative z-10">
-          <h1 className="text-xl font-bold text-white flex items-center gap-3 hover:text-purple-300 transition-all duration-500">
-            <div className="relative">
-              <HiShieldCheck className="w-8 h-8 text-purple-400 drop-shadow-lg" />
-              <div className="absolute inset-0 w-8 h-8 text-purple-400 animate-ping opacity-20">
-                <HiShieldCheck className="w-8 h-8" />
+          <h1 className="text-sm lg:text-xl font-bold text-white flex items-center gap-2 lg:gap-3 hover:text-purple-300 transition-all duration-500">
+            <div className="relative flex-shrink-0">
+              <HiShieldCheck className="w-6 h-6 lg:w-8 lg:h-8 text-purple-400 drop-shadow-lg" />
+              <div className="absolute inset-0 w-6 h-6 lg:w-8 lg:h-8 text-purple-400 animate-ping opacity-20">
+                <HiShieldCheck className="w-6 h-6 lg:w-8 lg:h-8" />
               </div>
             </div>
-            <span className="bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent font-extrabold tracking-wide">
+            <span className="bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent font-extrabold tracking-wide hidden sm:inline">
               DISASTER RESPONSE HUB
+            </span>
+            <span className="bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent font-extrabold tracking-wide sm:hidden">
+              DRH
             </span>
           </h1>
         </div>
-        <div className="navbar-end gap-3 relative z-10">
+        <div className="navbar-end gap-2 lg:gap-3 relative z-10">
           {/* Connection Status Indicator */}
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm ${
+          <div className={`flex items-center gap-1 lg:gap-2 px-2 lg:px-4 py-1 lg:py-2 rounded-full transition-all duration-300 backdrop-blur-sm ${
             socketConnected 
               ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20' 
               : 'bg-red-500/20 text-red-300 border border-red-400/50 shadow-lg shadow-red-500/20'
           }`}>
-            <HiWifi className="w-4 h-4" />
-            <span className="text-xs font-semibold">
+            <HiWifi className="w-3 h-3 lg:w-4 lg:h-4" />
+            <span className="text-xs font-semibold hidden sm:inline">
               {socketConnected ? 'LIVE' : `OFFLINE ${connectionAttempts > 0 ? `(${connectionAttempts})` : ''}`}
+            </span>
+            <span className="text-xs font-semibold sm:hidden">
+              {socketConnected ? '●' : '○'}
             </span>
           </div>
           
           {selectedDisaster && (
             <button 
-              className="btn btn-ghost btn-sm hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 text-gray-200 border border-purple-500/30 hover:border-purple-400/50 backdrop-blur-sm"
+              className="btn btn-ghost btn-xs lg:btn-sm hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 text-gray-200 border border-purple-500/30 hover:border-purple-400/50 backdrop-blur-sm"
               onClick={refreshData}
               disabled={loading}
             >
-              <HiRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'SYNCING...' : 'REFRESH'}
+              <HiRefresh className={`w-3 h-3 lg:w-4 lg:h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{loading ? 'SYNCING...' : 'REFRESH'}</span>
             </button>
           )}
           <button 
-            className="btn btn-outline btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
+            className="btn btn-outline btn-xs lg:btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
             onClick={() => setCurrentView(currentView === 'dashboard' ? 'ai-demo' : 'dashboard')}
           >
-            <HiSparkles className="w-4 h-4" />
-            {currentView === 'dashboard' ? 'AI DEMO' : 'DASHBOARD'}
+            <HiSparkles className="w-3 h-3 lg:w-4 lg:h-4" />
+            <span className="hidden sm:inline">{currentView === 'dashboard' ? 'AI DEMO' : 'DASHBOARD'}</span>
+            <span className="sm:hidden">AI</span>
           </button>
           <button 
-            className="btn btn-primary btn-sm bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 border-none hover:from-purple-500 hover:via-violet-500 hover:to-purple-600 transition-all duration-300 shadow-xl shadow-purple-500/25 text-white font-bold tracking-wide hover:scale-105"
+            className="btn btn-primary btn-xs lg:btn-sm bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 border-none hover:from-purple-500 hover:via-violet-500 hover:to-purple-600 transition-all duration-300 shadow-xl shadow-purple-500/25 text-white font-bold tracking-wide hover:scale-105"
             onClick={() => setShowCreateForm(true)}
           >
-            <HiPlus className="w-4 h-4" />
-            REPORT EVENT
+            <HiPlus className="w-3 h-3 lg:w-4 lg:h-4" />
+            <span className="hidden sm:inline">REPORT EVENT</span>
+            <span className="sm:hidden">REPORT</span>
           </button>
           {selectedDisaster && (
             <button 
-              className="btn btn-outline btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
+              className="btn btn-outline btn-xs lg:btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
               onClick={() => setShowReportForm(true)}
             >
-              <HiChatAlt2 className="w-4 h-4" />
-              ADD REPORT
+              <HiChatAlt2 className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">ADD REPORT</span>
+              <span className="sm:hidden">ADD</span>
             </button>
           )}
         </div>
@@ -438,9 +447,9 @@ const App = ({ hideHeader = false }) => {
       {currentView === 'ai-demo' ? (
         <AIMapDemo />
       ) : (
-        <div className="flex h-screen">
+        <div className="flex flex-col lg:flex-row h-screen">
           {/* Sidebar - Disasters List */}
-          <div className="w-80 bg-black/30 backdrop-blur-2xl border-r border-purple-500/30 p-6 overflow-y-auto relative">
+          <div className="w-full lg:w-80 bg-black/30 backdrop-blur-2xl border-b lg:border-b-0 lg:border-r border-purple-500/30 p-4 lg:p-6 overflow-y-auto relative max-h-64 lg:max-h-none">
             <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 via-transparent to-violet-900/10"></div>
             <div className="relative z-10">
               <div className="mb-6">
@@ -501,7 +510,7 @@ const App = ({ hideHeader = false }) => {
           </div>
 
           {/* Main Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
           {selectedDisaster ? (
             <div>
               {/* Disaster Header */}
@@ -531,7 +540,7 @@ const App = ({ hideHeader = false }) => {
 
                 {/* Analytics Summary */}
                 {analytics && (
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 lg:gap-4 mb-6">
                     <div className="stat bg-base-100/10 rounded-lg">
                       <div className="stat-title text-gray-400">Total Reports</div>
                       <div className="stat-value text-white">{analytics.total_reports}</div>
@@ -553,7 +562,7 @@ const App = ({ hideHeader = false }) => {
               </div>
 
               {/* Tabs */}
-              <div className="tabs tabs-boxed bg-base-100/10 mb-6">
+              <div className="tabs tabs-boxed bg-base-100/10 mb-6 overflow-x-auto">
                 {['overview', 'reports', 'social', 'resources'].map(tab => (
                   <button
                     key={tab}
@@ -719,7 +728,7 @@ const App = ({ hideHeader = false }) => {
               {activeTab === 'resources' && (
                 <div className="card bg-base-100/10">
                   <div className="card-body p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                       {resources.map(resource => (
                         <div key={resource.id} className="border border-white/10 rounded-lg p-4">
                           <div className="flex items-center justify-between mb-2">

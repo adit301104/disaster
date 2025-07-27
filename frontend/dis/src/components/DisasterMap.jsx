@@ -106,7 +106,7 @@ const DisasterMap = ({ disaster }) => {
             )}
           </div>
         </div>
-        <div className="relative h-64">
+        <div className="relative h-48 md:h-64">
           <div
             ref={mapRef}
             className="w-full h-full rounded-b-lg"

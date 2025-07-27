@@ -243,7 +243,7 @@ const AIMapDemo = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
           {/* Left Panel - Input and Analysis */}
           <div className="space-y-6">
             {/* Input Section */}
@@ -386,7 +386,7 @@ const AIMapDemo = () => {
                     {mapLoaded ? 'Map loaded - locations will appear here' : 'Loading OpenStreetMap...'}
                   </p>
                 </div>
-                <div className="relative h-96 lg:h-[600px]">
+                <div className="relative h-64 md:h-96 xl:h-[600px]">
                   <div
                     ref={mapRef}
                     className="w-full h-full rounded-b-lg"
