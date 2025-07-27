@@ -1,38 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  HiExclamation, 
-  HiLocationMarker, 
-  HiUsers, 
-  HiChatAlt2, 
-  HiShieldCheck, 
-  HiPlus, 
-  HiSearch, 
-  HiFilter, 
-  HiBell, 
-  HiRefresh, 
-  HiClock, 
-  HiCheckCircle, 
-  HiXCircle, 
-  HiExclamationCircle,
-  HiGlobe,
-  HiChartBar,
-  HiHeart,
-  HiShare,
-  HiExternalLink,
-  HiWifi,
-  HiEye,
-  HiTrendingUp,
-  HiDocumentReport,
-  HiCollection,
-  HiSparkles,
-  HiAdjustments,
-  HiInformationCircle,
-  HiLightBulb
-} from 'react-icons/hi';
+import { AlertCircle, MapPin, Users, MessageSquare, Shield, Plus, Search, Filter, Bell, Activity, Clock, CheckCircle, XCircle, AlertTriangle, Zap, Globe, Satellite, Radio, Eye, TrendingUp, BarChart3, Users2, Heart, Share2, ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import io from 'socket.io-client';
-import AIMapDemo from './components/AIMapDemo';
-import GeminiAnalysis from './components/GeminiAnalysis';
-import DisasterMap from './components/DisasterMap';
 
 const PRIMARY_API_URL = import.meta.env.VITE_API_URL || 'https://disaster-600s.onrender.com';
 const FALLBACK_API_URL = 'http://localhost:3000';
@@ -78,7 +46,7 @@ const apiCall = async (endpoint, options = {}) => {
 };
 
 // Main App Component
-const App = ({ hideHeader = false }) => {
+const App = () => {
   const [disasters, setDisasters] = useState([]);
   const [selectedDisaster, setSelectedDisaster] = useState(null);
   const [socialMedia, setSocialMedia] = useState([]);
@@ -92,8 +60,24 @@ const App = ({ hideHeader = false }) => {
   const [showReportForm, setShowReportForm] = useState(false);
   const [socketConnected, setSocketConnected] = useState(false);
   const [connectionAttempts, setConnectionAttempts] = useState(0);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard' or 'ai-demo'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [typeFilter, setTypeFilter] = useState('');
   const socketRef = useRef(null);
+
+  // Filter disasters based on search and filters
+  const filteredDisasters = disasters.filter(disaster => {
+    const matchesSearch = !searchQuery || 
+      disaster.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      disaster.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      disaster.location_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      disaster.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesStatus = !statusFilter || disaster.status === statusFilter;
+    const matchesType = !typeFilter || disaster.disaster_type === typeFilter;
+    
+    return matchesSearch && matchesStatus && matchesType;
+  });
 
   // Socket connection and event handlers
   useEffect(() => {
@@ -334,12 +318,12 @@ const App = ({ hideHeader = false }) => {
 
   const getSeverityIcon = (severity) => {
     const icons = {
-      critical: <HiExclamationCircle className="w-4 h-4 text-red-500" />,
-      high: <HiExclamation className="w-4 h-4 text-orange-500" />,
-      medium: <HiInformationCircle className="w-4 h-4 text-yellow-500" />,
-      low: <HiCheckCircle className="w-4 h-4 text-green-500" />
+      critical: <AlertCircle className="w-4 h-4 text-red-500" />,
+      high: <AlertTriangle className="w-4 h-4 text-orange-500" />,
+      medium: <AlertCircle className="w-4 h-4 text-yellow-500" />,
+      low: <CheckCircle className="w-4 h-4 text-green-500" />
     };
-    return icons[severity] || <HiInformationCircle className="w-4 h-4 text-gray-500" />;
+    return icons[severity] || <AlertCircle className="w-4 h-4 text-gray-500" />;
   };
 
   const formatTimeAgo = (dateString) => {
@@ -354,154 +338,160 @@ const App = ({ hideHeader = false }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-purple-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Notifications */}
       <div className="toast toast-top toast-end z-50">
         {notifications.map(notif => (
-          <div key={notif.id} className={`alert alert-${notif.type} shadow-2xl backdrop-blur-md border border-purple-500/20`}>
-            <span className="text-white">{notif.message}</span>
+          <div key={notif.id} className={`alert alert-${notif.type} shadow-lg`}>
+            <span>{notif.message}</span>
           </div>
         ))}
       </div>
 
       {/* Header */}
-      <div className="navbar bg-black/40 backdrop-blur-2xl border-b border-purple-500/30 shadow-2xl relative z-10">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/20 via-transparent to-violet-900/20"></div>
-        <div className="navbar-start relative z-10">
-          <h1 className="text-xl font-bold text-white flex items-center gap-3 hover:text-purple-300 transition-all duration-500">
-            <div className="relative">
-              <HiShieldCheck className="w-8 h-8 text-purple-400 drop-shadow-lg" />
-              <div className="absolute inset-0 w-8 h-8 text-purple-400 animate-ping opacity-20">
-                <HiShieldCheck className="w-8 h-8" />
-              </div>
-            </div>
-            <span className="bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent font-extrabold tracking-wide">
-              DISASTER RESPONSE HUB
-            </span>
+      <div className="navbar bg-base-100/10 backdrop-blur-xl border-b border-white/10">
+        <div className="navbar-start">
+          <h1 className="text-xl font-bold text-white flex items-center gap-2">
+            <Shield className="w-6 h-6 text-blue-400" />
+            Disaster Response Hub
           </h1>
         </div>
-        <div className="navbar-end gap-3 relative z-10">
+        <div className="navbar-end gap-2">
           {/* Connection Status Indicator */}
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 backdrop-blur-sm ${
-            socketConnected 
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 shadow-lg shadow-emerald-500/20' 
-              : 'bg-red-500/20 text-red-300 border border-red-400/50 shadow-lg shadow-red-500/20'
+          <div className={`flex items-center gap-2 px-2 py-1 rounded-lg ${
+            socketConnected ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
           }`}>
-            <HiWifi className="w-4 h-4" />
-            <span className="text-xs font-semibold">
-              {socketConnected ? 'LIVE' : `OFFLINE ${connectionAttempts > 0 ? `(${connectionAttempts})` : ''}`}
+            {socketConnected ? <Wifi className="w-4 h-4" /> : <WifiOff className="w-4 h-4" />}
+            <span className="text-xs">
+              {socketConnected ? 'Connected' : `Disconnected ${connectionAttempts > 0 ? `(${connectionAttempts})` : ''}`}
             </span>
           </div>
           
           {selectedDisaster && (
             <button 
-              className="btn btn-ghost btn-sm hover:bg-purple-500/20 hover:text-purple-300 transition-all duration-300 text-gray-200 border border-purple-500/30 hover:border-purple-400/50 backdrop-blur-sm"
+              className="btn btn-ghost btn-sm"
               onClick={refreshData}
               disabled={loading}
             >
-              <HiRefresh className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              {loading ? 'SYNCING...' : 'REFRESH'}
+              <Activity className="w-4 h-4" />
+              {loading ? 'Loading...' : 'Refresh'}
             </button>
           )}
           <button 
-            className="btn btn-outline btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
-            onClick={() => setCurrentView(currentView === 'dashboard' ? 'ai-demo' : 'dashboard')}
-          >
-            <HiSparkles className="w-4 h-4" />
-            {currentView === 'dashboard' ? 'AI DEMO' : 'DASHBOARD'}
-          </button>
-          <button 
-            className="btn btn-primary btn-sm bg-gradient-to-r from-purple-600 via-violet-600 to-purple-700 border-none hover:from-purple-500 hover:via-violet-500 hover:to-purple-600 transition-all duration-300 shadow-xl shadow-purple-500/25 text-white font-bold tracking-wide hover:scale-105"
+            className="btn btn-primary btn-sm"
             onClick={() => setShowCreateForm(true)}
           >
-            <HiPlus className="w-4 h-4" />
-            REPORT EVENT
+            <Plus className="w-4 h-4" />
+            Report Disaster
           </button>
           {selectedDisaster && (
             <button 
-              className="btn btn-outline btn-sm border-purple-400/60 text-purple-300 hover:bg-purple-500/20 hover:border-purple-300 transition-all duration-300 backdrop-blur-sm font-semibold"
+              className="btn btn-outline btn-sm"
               onClick={() => setShowReportForm(true)}
             >
-              <HiChatAlt2 className="w-4 h-4" />
-              ADD REPORT
+              <MessageSquare className="w-4 h-4" />
+              Submit Report
             </button>
           )}
         </div>
       </div>
 
-      {currentView === 'ai-demo' ? (
-        <AIMapDemo />
-      ) : (
-        <div className="flex h-screen">
-          {/* Sidebar - Disasters List */}
-          <div className="w-80 bg-black/30 backdrop-blur-2xl border-r border-purple-500/30 p-6 overflow-y-auto relative">
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-900/10 via-transparent to-violet-900/10"></div>
-            <div className="relative z-10">
-              <div className="mb-6">
-                <div className="form-control">
-                  <div className="relative">
-                    <input 
-                      type="text" 
-                      placeholder="Search events..." 
-                      className="input input-bordered input-sm w-full bg-black/40 border-purple-500/40 text-white placeholder-gray-400 focus:border-purple-400 focus:ring-2 focus:ring-purple-400/30 transition-all duration-300 backdrop-blur-sm"
-                    />
-                    <button className="absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-400 hover:text-purple-300 transition-colors duration-300">
-                      <HiSearch className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+      <div className="flex h-screen">
+        {/* Sidebar - Disasters List */}
+        <div className="w-80 bg-base-100/5 backdrop-blur-xl border-r border-white/10 p-4 overflow-y-auto">
+          <div className="mb-4 space-y-3">
+            {/* Search Bar */}
+            <div className="form-control">
+              <div className="input-group">
+                <input 
+                  type="text" 
+                  placeholder="Search disasters..." 
+                  className="input input-bordered input-sm w-full bg-white/10 text-white placeholder-gray-400"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button className="btn btn-square btn-sm bg-primary/20 border-primary/30 hover:bg-primary/30">
+                  <Search className="w-4 h-4 text-primary" />
+                </button>
               </div>
+            </div>
 
-              <div className="space-y-4">
-                {disasters.map(disaster => (
-                  <div 
-                    key={disaster.id}
-                    className={`card bg-black/40 cursor-pointer transition-all duration-300 hover:bg-black/60 hover:scale-[1.02] hover:shadow-xl hover:shadow-purple-500/20 border backdrop-blur-sm ${
-                      selectedDisaster?.id === disaster.id 
-                        ? 'ring-2 ring-purple-400 bg-purple-500/20 border-purple-400/50 shadow-lg shadow-purple-500/30' 
-                        : 'border-purple-500/20 hover:border-purple-400/40'
-                    }`}
-                    onClick={() => setSelectedDisaster(disaster)}
-                  >
-                    <div className="card-body p-4">
-                      <div className="flex justify-between items-start mb-3">
-                        <h3 className="card-title text-sm text-white font-bold leading-tight">{disaster.title}</h3>
-                        <div className={`badge ${getStatusColor(disaster.status)} badge-sm font-semibold`}>
-                          {disaster.status.toUpperCase()}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-purple-300 mb-2 font-medium">
-                        <HiLocationMarker className="w-3 h-3" />
-                        {disaster.location_name || 'Unknown location'}
-                      </div>
-                      <div className="flex items-center gap-2 text-xs text-gray-400">
-                        <HiClock className="w-3 h-3" />
-                        {formatTimeAgo(disaster.created_at)}
-                      </div>
-                      {disaster.tags && disaster.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {disaster.tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="badge badge-xs badge-outline text-purple-300 border-purple-400/60 hover:bg-purple-400/20 transition-colors duration-200 font-medium">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Filters */}
+            <div className="flex gap-2">
+              <select 
+                className="select select-bordered select-xs bg-white/10 text-white flex-1"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="monitoring">Monitoring</option>
+                <option value="resolved">Resolved</option>
+                <option value="pending">Pending</option>
+              </select>
+              
+              <select 
+                className="select select-bordered select-xs bg-white/10 text-white flex-1"
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+              >
+                <option value="">All Types</option>
+                <option value="flood">Flood</option>
+                <option value="earthquake">Earthquake</option>
+                <option value="hurricane">Hurricane</option>
+                <option value="wildfire">Wildfire</option>
+                <option value="tornado">Tornado</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {/* Results count */}
+            <div className="text-xs text-gray-400">
+              Showing {filteredDisasters.length} of {disasters.length} disasters
             </div>
           </div>
 
-          {/* Main Content */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="space-y-3">
+            {filteredDisasters.map(disaster => (
+              <div 
+                key={disaster.id}
+                className={`card bg-base-100/10 cursor-pointer transition-all hover:bg-base-100/20 ${
+                  selectedDisaster?.id === disaster.id ? 'ring-2 ring-primary' : ''
+                }`}
+                onClick={() => setSelectedDisaster(disaster)}
+              >
+                <div className="card-body p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="card-title text-sm text-white">{disaster.title}</h3>
+                    <div className={`badge ${getStatusColor(disaster.status)} badge-sm`}>
+                      {disaster.status}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-300">
+                    <MapPin className="w-3 h-3" />
+                    {disaster.location_name || 'Unknown location'}
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                    <Clock className="w-3 h-3" />
+                    {formatTimeAgo(disaster.created_at)}
+                  </div>
+                  {disaster.tags && disaster.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {disaster.tags.slice(0, 3).map(tag => (
+                        <span key={tag} className="badge badge-xs badge-outline text-gray-300">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="flex-1 p-6 overflow-y-auto">
           {selectedDisaster ? (
             <div>
               {/* Disaster Header */}
@@ -511,14 +501,14 @@ const App = ({ hideHeader = false }) => {
                     <h1 className="text-3xl font-bold text-white mb-2">{selectedDisaster.title}</h1>
                     <div className="flex items-center gap-4 text-gray-300">
                       <div className="flex items-center gap-2">
-                        <HiLocationMarker className="w-4 h-4" />
+                        <MapPin className="w-4 h-4" />
                         {selectedDisaster.location_name || 'Unknown location'}
                       </div>
                       <div className={`badge ${getStatusColor(selectedDisaster.status)}`}>
                         {selectedDisaster.status}
                       </div>
                       <div className="flex items-center gap-2">
-                        <HiClock className="w-4 h-4" />
+                        <Clock className="w-4 h-4" />
                         {formatTimeAgo(selectedDisaster.created_at)}
                       </div>
                     </div>
@@ -567,63 +557,55 @@ const App = ({ hideHeader = false }) => {
 
               {/* Tab Content */}
               {activeTab === 'overview' && (
-                <div className="space-y-6">
-                  {/* Gemini AI Analysis */}
-                  <GeminiAnalysis disaster={selectedDisaster} />
-                  
-                  {/* Disaster Map */}
-                  <DisasterMap disaster={selectedDisaster} />
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Recent Reports */}
-                    <div className="card bg-base-100/10">
-                      <div className="card-header p-4 border-b border-white/10">
-                        <h3 className="card-title text-white">Recent Reports</h3>
-                      </div>
-                      <div className="card-body p-4">
-                        <div className="space-y-3 max-h-64 overflow-y-auto">
-                          {reports.slice(0, 5).map(report => (
-                            <div key={report.id} className="flex items-start gap-3 p-3 bg-base-100/10 rounded-lg">
-                              {getSeverityIcon(report.severity)}
-                              <div className="flex-1">
-                                <p className="text-sm text-gray-300">{report.content}</p>
-                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
-                                  <span>{formatTimeAgo(report.created_at)}</span>
-                                  <span className={`badge badge-xs ${
-                                    report.verification_status === 'authentic' ? 'badge-success' :
-                                    report.verification_status === 'pending' ? 'badge-warning' :
-                                    'badge-error'
-                                  }`}>
-                                    {report.verification_status}
-                                  </span>
-                                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Recent Reports */}
+                  <div className="card bg-base-100/10">
+                    <div className="card-header p-4 border-b border-white/10">
+                      <h3 className="card-title text-white">Recent Reports</h3>
+                    </div>
+                    <div className="card-body p-4">
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                        {reports.slice(0, 5).map(report => (
+                          <div key={report.id} className="flex items-start gap-3 p-3 bg-base-100/10 rounded-lg">
+                            {getSeverityIcon(report.severity)}
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-300">{report.content}</p>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-gray-400">
+                                <span>{formatTimeAgo(report.created_at)}</span>
+                                <span className={`badge badge-xs ${
+                                  report.verification_status === 'authentic' ? 'badge-success' :
+                                  report.verification_status === 'pending' ? 'badge-warning' :
+                                  'badge-error'
+                                }`}>
+                                  {report.verification_status}
+                                </span>
                               </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Available Resources */}
-                    <div className="card bg-base-100/10">
-                      <div className="card-header p-4 border-b border-white/10">
-                        <h3 className="card-title text-white">Available Resources</h3>
-                      </div>
-                      <div className="card-body p-4">
-                        <div className="space-y-3 max-h-64 overflow-y-auto">
-                          {resources.filter(r => r.availability_status === 'available').slice(0, 5).map(resource => (
-                            <div key={resource.id} className="flex items-center justify-between p-3 bg-base-100/10 rounded-lg">
-                              <div>
-                                <p className="text-sm font-medium text-white">{resource.name}</p>
-                                <p className="text-xs text-gray-400">{resource.resource_type}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-sm text-white">{resource.quantity}</p>
-                                <p className="text-xs text-green-400">Available</p>
-                              </div>
+                  {/* Available Resources */}
+                  <div className="card bg-base-100/10">
+                    <div className="card-header p-4 border-b border-white/10">
+                      <h3 className="card-title text-white">Available Resources</h3>
+                    </div>
+                    <div className="card-body p-4">
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                        {resources.filter(r => r.availability_status === 'available').slice(0, 5).map(resource => (
+                          <div key={resource.id} className="flex items-center justify-between p-3 bg-base-100/10 rounded-lg">
+                            <div>
+                              <p className="text-sm font-medium text-white">{resource.name}</p>
+                              <p className="text-xs text-gray-400">{resource.resource_type}</p>
                             </div>
-                          ))}
-                        </div>
+                            <div className="text-right">
+                              <p className="text-sm text-white">{resource.quantity}</p>
+                              <p className="text-xs text-green-400">Available</p>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
@@ -745,33 +727,16 @@ const App = ({ hideHeader = false }) => {
               )}
             </div>
           ) : (
-            <div className="flex items-center justify-center h-full relative">
-              <div className="text-center relative z-10">
-                <div className="relative mb-8">
-                  <HiInformationCircle className="w-24 h-24 text-purple-400/60 mx-auto drop-shadow-lg" />
-                  <div className="absolute inset-0 w-24 h-24 text-purple-400/20 animate-ping mx-auto">
-                    <HiInformationCircle className="w-24 h-24" />
-                  </div>
-                </div>
-                <h2 className="text-4xl font-extrabold bg-gradient-to-r from-white via-purple-200 to-violet-300 bg-clip-text text-transparent mb-4 tracking-wide">
-                  SELECT AN EVENT
-                </h2>
-                <p className="text-gray-400 text-lg font-medium">Choose an event from the sidebar to view detailed information</p>
-                <div className="mt-8 px-8 py-4 bg-purple-500/10 border border-purple-500/20 rounded-lg backdrop-blur-sm">
-                  <p className="text-purple-300 text-sm">Real-time disaster monitoring and response coordination</p>
-                </div>
-              </div>
-              {/* Background decoration */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-5">
-                <div className="w-96 h-96 border-2 border-purple-500 rounded-full"></div>
-                <div className="absolute w-80 h-80 border border-purple-400 rounded-full"></div>
-                <div className="absolute w-64 h-64 border border-purple-300 rounded-full"></div>
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center">
+                <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-white mb-2">Select a Disaster</h2>
+                <p className="text-gray-400">Choose a disaster from the sidebar to view details</p>
               </div>
             </div>
           )}
-          </div>
         </div>
-      )}
+      </div>
 
       {/* Create Disaster Modal */}
       {showCreateForm && <CreateDisasterModal onClose={() => setShowCreateForm(false)} onSubmit={createDisaster} />}

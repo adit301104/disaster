@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+        }
+        .container {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        button {
+            background: #8b5cf6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #7c3aed;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            background: #1a1a2e;
+            color: white;
+            border: 1px solid #8b5cf6;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        .result {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border-left: 4px solid #8b5cf6;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background: #1f1f1f;
+        }
+        .success {
+            border-left-color: #10b981;
+            background: #0f1f0f;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Backend API Test</h1>
+    
+    <div class="container">
+        <h2>Test Backend Connection</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="testCors()">Test CORS</button>
+        <div id="connectionResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>Test Geocode Endpoint</h2>
+        <textarea id="testDescription" placeholder="Enter a disaster description (e.g., 'Flooding in Miami, Florida')">Severe flooding reported in downtown Miami, Florida. Water levels rising rapidly near Biscayne Bay area.</textarea>
+        <br>
+        <button onclick="testGeocode()">Test Geocode API</button>
+        <div id="geocodeResult"></div>
+    </div>
+
+    <div class="container">
+        <h2>Debug Information</h2>
+        <div id="debugInfo">
+            <p><strong>API Base URL:</strong> <span id="apiUrl"></span></p>
+            <p><strong>Browser:</strong> <span id="browserInfo"></span></p>
+            <p><strong>Current Time:</strong> <span id="currentTime"></span></p>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000';
+        
+        // Update debug info
+        document.getElementById('apiUrl').textContent = API_BASE;
+        document.getElementById('browserInfo').textContent = navigator.userAgent;
+        document.getElementById('currentTime').textContent = new Date().toISOString();
+
+        function showResult(elementId, message, isError = false, isSuccess = false) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="result ${isError ? 'error' : isSuccess ? 'success' : ''}">${message}</div>`;
+        }
+
+        async function testHealth() {
+            try {
+                showResult('connectionResult', '⏳ Testing health endpoint...');
+                
+                const response = await fetch(`${API_BASE}/health`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showResult('connectionResult', `✅ Health check successful!<br><pre>${JSON.stringify(data, null, 2)}</pre>`, false, true);
+            } catch (error) {
+                showResult('connectionResult', `❌ Health check failed: ${error.message}`, true);
+            }
+        }
+
+        async function testCors() {
+            try {
+                showResult('connectionResult', '⏳ Testing CORS...');
+                
+                const response = await fetch(`${API_BASE}/cors-test`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                showResult('connectionResult', `✅ CORS test successful!<br><pre>${JSON.stringify(data, null, 2)}</pre>`, false, true);
+            } catch (error) {
+                showResult('connectionResult', `❌ CORS test failed: ${error.message}`, true);
+            }
+        }
+
+        async function testGeocode() {
+            const description = document.getElementById('testDescription').value.trim();
+            
+            if (!description) {
+                showResult('geocodeResult', '❌ Please enter a description first', true);
+                return;
+            }
+
+            try {
+                showResult('geocodeResult', '⏳ Testing geocode endpoint...');
+                
+                console.log('Sending request:', { description });
+                
+                const response = await fetch(`${API_BASE}/geocode`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-id': 'netrunnerX'
+                    },
+                    body: JSON.stringify({ description })
+                });
+
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log('Success response:', data);
+                
+                showResult('geocodeResult', `✅ Geocode test successful!<br><pre>${JSON.stringify(data, null, 2)}</pre>`, false, true);
+            } catch (error) {
+                console.error('Geocode error:', error);
+                showResult('geocodeResult', `❌ Geocode test failed: ${error.message}<br><br><strong>Troubleshooting:</strong><br>1. Make sure backend server is running on ${API_BASE}<br>2. Check if Gemini API key is configured<br>3. Verify CORS settings<br>4. Check browser console for more details`, true);
+            }
+        }
+
+        // Auto-test health on page load
+        window.addEventListener('load', () => {
+            setTimeout(testHealth, 1000);
+        });
+    </script>
+</body>
+</html>

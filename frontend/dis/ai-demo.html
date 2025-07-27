@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Disaster Analysis Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+        .glow {
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen relative overflow-hidden">
+        <!-- Animated background elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-violet-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+            <div class="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        </div>
+
+        <!-- Header -->
+        <div class="navbar glass shadow-2xl relative z-10">
+            <div class="navbar-start">
+                <h1 class="text-xl font-bold text-white flex items-center gap-3">
+                    <div class="relative">
+                        <svg class="w-8 h-8 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <div class="absolute inset-0 w-8 h-8 text-purple-400 animate-ping opacity-20">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent font-extrabold tracking-wide">
+                        AI-POWERED DISASTER ANALYSIS
+                    </span>
+                </h1>
+            </div>
+            <div class="navbar-end">
+                <a href="index.html" class="btn btn-ghost btn-sm text-purple-300 hover:bg-purple-500/20">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="container mx-auto p-6">
+            <!-- Header Section -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <svg class="w-8 h-8 text-purple-400 animate-float" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                    <h1 class="text-4xl font-bold bg-gradient-to-r from-purple-300 via-violet-200 to-white bg-clip-text text-transparent">
+                        AI-Powered Disaster Analysis
+                    </h1>
+                    <svg class="w-8 h-8 text-purple-400 animate-float" style="animation-delay: 1s;" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <p class="text-gray-300 text-lg">
+                    Demonstrating Gemini AI + Google Maps integration for disaster response
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left Panel - Input and Analysis -->
+                <div class="space-y-6">
+                    <!-- Input Section -->
+                    <div class="card glass glow">
+                        <div class="card-body">
+                            <h2 class="card-title text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                </svg>
+                                Disaster Description
+                            </h2>
+                            
+                            <div class="form-control">
+                                <textarea
+                                    id="description"
+                                    class="textarea textarea-bordered bg-black/20 border-purple-500/40 text-white placeholder-gray-400 focus:border-purple-400 min-h-32"
+                                    placeholder="Describe a disaster scenario (e.g., 'Severe flooding in downtown Miami, Florida...')"
+                                ></textarea>
+                            </div>
+
+                            <div class="flex gap-2 mt-4">
+                                <button
+                                    id="analyzeBtn"
+                                    class="btn btn-primary flex-1 bg-gradient-to-r from-purple-600 to-violet-600 border-none"
+                                >
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    Analyze with AI
+                                </button>
+                                <button
+                                    id="clearBtn"
+                                    class="btn btn-outline border-purple-500/50 text-purple-300 hover:bg-purple-500/20"
+                                >
+                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sample Scenarios -->
+                    <div class="card glass">
+                        <div class="card-body">
+                            <h3 class="card-title text-white text-sm">Sample Scenarios</h3>
+                            <div class="space-y-2" id="sampleScenarios">
+                                <button class="btn btn-ghost btn-sm justify-start text-left h-auto py-2 px-3 text-gray-300 hover:bg-purple-500/20 hover:text-white normal-case w-full sample-btn">
+                                    <svg class="w-3 h-3 text-orange-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="truncate">Severe flooding reported in downtown Miami, Florida. Water levels rising rapidly near Biscayne Bay area.</span>
+                                </button>
+                                <button class="btn btn-ghost btn-sm justify-start text-left h-auto py-2 px-3 text-gray-300 hover:bg-purple-500/20 hover:text-white normal-case w-full sample-btn">
+                                    <svg class="w-3 h-3 text-orange-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="truncate">Earthquake magnitude 6.2 struck near San Francisco, California. Buildings shaking in Financial District.</span>
+                                </button>
+                                <button class="btn btn-ghost btn-sm justify-start text-left h-auto py-2 px-3 text-gray-300 hover:bg-purple-500/20 hover:text-white normal-case w-full sample-btn">
+                                    <svg class="w-3 h-3 text-orange-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="truncate">Wildfire spreading rapidly through Malibu, California. Evacuation orders issued for coastal areas.</span>
+                                </button>
+                                <button class="btn btn-ghost btn-sm justify-start text-left h-auto py-2 px-3 text-gray-300 hover:bg-purple-500/20 hover:text-white normal-case w-full sample-btn">
+                                    <svg class="w-3 h-3 text-orange-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="truncate">Hurricane approaching New Orleans, Louisiana. Category 3 storm with 120 mph winds expected landfall.</span>
+                                </button>
+                                <button class="btn btn-ghost btn-sm justify-start text-left h-auto py-2 px-3 text-gray-300 hover:bg-purple-500/20 hover:text-white normal-case w-full sample-btn">
+                                    <svg class="w-3 h-3 text-orange-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="truncate">Tornado spotted in Moore, Oklahoma. Funnel cloud moving northeast towards residential areas.</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="resultsSection" class="space-y-4" style="display: none;">
+                        <!-- Location Result -->
+                        <div id="locationResult" class="card glass border-green-500/30">
+                            <div class="card-body">
+                                <h3 class="card-title text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Location Extracted
+                                </h3>
+                                <div id="locationContent"></div>
+                            </div>
+                        </div>
+
+                        <!-- AI Analysis -->
+                        <div id="aiAnalysis" class="card glass border-blue-500/30">
+                            <div class="card-body">
+                                <h3 class="card-title text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                                    </svg>
+                                    AI Analysis
+                                </h3>
+                                <div id="aiContent"></div>
+                            </div>
+                        </div>
+
+                        <!-- Suggestions -->
+                        <div id="suggestions" class="card glass border-yellow-500/30">
+                            <div class="card-body">
+                                <h3 class="card-title text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Suggested Actions
+                                </h3>
+                                <ul id="suggestionsList" class="space-y-2"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Panel - Map -->
+                <div class="space-y-6">
+                    <div class="card glass h-full">
+                        <div class="card-body p-0">
+                            <div class="p-4 border-b border-purple-500/30">
+                                <h3 class="card-title text-white flex items-center gap-2">
+                                    <svg class="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M12 1.586l-4 4v12.828l4-4V1.586zM3.707 3.293A1 1 0 002 4v10a1 1 0 00.293.707L6 18.414V5.586L3.707 3.293zM17.707 5.293L14 1.586v12.828l2.293 2.293A1 1 0 0018 16V6a1 1 0 00-.293-.707z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    Interactive Map
+                                </h3>
+                                <p class="text-gray-400 text-sm" id="mapStatus">
+                                    Loading Google Maps...
+                                </p>
+                            </div>
+                            <div class="relative h-96 lg:h-[600px]">
+                                <div
+                                    id="map"
+                                    class="w-full h-full rounded-b-lg"
+                                    style="min-height: 400px;"
+                                ></div>
+                                <div id="mapLoading" class="absolute inset-0 flex items-center justify-center bg-black/60 rounded-b-lg">
+                                    <div class="text-center">
+                                        <div class="loading loading-spinner loading-lg text-purple-400"></div>
+                                        <p class="text-gray-300 mt-2">Loading Google Maps...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="mt-8 text-center">
+                <div class="card glass">
+                    <div class="card-body py-4">
+                        <p class="text-gray-400 text-sm">
+                            🚀 This demo showcases the integration of <strong class="text-purple-300">Google Gemini AI</strong> for 
+                            intelligent text analysis and <strong class="text-purple-300">Google Maps API</strong> for location 
+                            visualization in disaster response scenarios.
+                        </p>
+                        <div class="flex items-center justify-center gap-4 mt-2 text-xs text-gray-500">
+                            <span>✨ AI-powered location extraction</span>
+                            <span>🗺️ Real-time map visualization</span>
+                            <span>📊 Intelligent disaster analysis</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:3000'; // Update this to your backend URL
+        
+        let map;
+        let currentMarker;
+
+        // Initialize Google Maps
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 39.8283, lng: -98.5795 }, // Center of USA
+                zoom: 4,
+                styles: [
+                    {
+                        "featureType": "all",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#1a1a2e"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text.fill",
+                        "stylers": [{"color": "#ffffff"}]
+                    },
+                    {
+                        "featureType": "all",
+                        "elementType": "labels.text.stroke",
+                        "stylers": [{"color": "#000000"}, {"lightness": 13}]
+                    },
+                    {
+                        "featureType": "water",
+                        "elementType": "geometry",
+                        "stylers": [{"color": "#16213e"}]
+                    }
+                ]
+            });
+            
+            document.getElementById('mapLoading').style.display = 'none';
+            document.getElementById('mapStatus').textContent = 'Map loaded - locations will appear here';
+        }
+
+        // Add marker to map
+        function addMarkerToMap(coordinates, title, description) {
+            if (map && coordinates) {
+                // Clear existing markers
+                if (currentMarker) {
+                    currentMarker.setMap(null);
+                }
+
+                const marker = new google.maps.Marker({
+                    position: { lat: coordinates.lat, lng: coordinates.lng },
+                    map: map,
+                    title: title,
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="20" cy="20" r="18" fill="#ef4444" stroke="#ffffff" stroke-width="2"/>
+                                <text x="20" y="26" text-anchor="middle" fill="white" font-size="16" font-weight="bold">!</text>
+                            </svg>
+                        `),
+                        scaledSize: new google.maps.Size(40, 40)
+                    }
+                });
+
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `
+                        <div style="color: #333; max-width: 300px;">
+                            <h3 style="margin: 0 0 10px 0; color: #ef4444;">${title}</h3>
+                            <p style="margin: 0; line-height: 1.4;">${description}</p>
+                            <p style="margin: 10px 0 0 0; font-size: 12px; color: #666;">
+                                Coordinates: ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}
+                            </p>
+                        </div>
+                    `
+                });
+
+                marker.addListener('click', () => {
+                    infoWindow.open(map, marker);
+                });
+
+                // Center map on marker
+                map.setCenter({ lat: coordinates.lat, lng: coordinates.lng });
+                map.setZoom(12);
+
+                // Store marker reference for cleanup
+                currentMarker = marker;
+
+                // Auto-open info window
+                setTimeout(() => {
+                    infoWindow.open(map, marker);
+                }, 500);
+            }
+        }
+
+        // Mock AI analysis functions
+        function detectDisasterType(desc) {
+            const lower = desc.toLowerCase();
+            if (lower.includes('flood') || lower.includes('water')) return 'Flood';
+            if (lower.includes('fire') || lower.includes('wildfire')) return 'Wildfire';
+            if (lower.includes('earthquake') || lower.includes('quake')) return 'Earthquake';
+            if (lower.includes('hurricane') || lower.includes('storm')) return 'Hurricane';
+            if (lower.includes('tornado') || lower.includes('funnel')) return 'Tornado';
+            return 'Natural Disaster';
+        }
+
+        function detectSeverity(desc) {
+            const lower = desc.toLowerCase();
+            if (lower.includes('severe') || lower.includes('critical') || lower.includes('emergency')) return 'HIGH';
+            if (lower.includes('moderate') || lower.includes('warning')) return 'MEDIUM';
+            return 'MODERATE';
+        }
+
+        function generateMockAnalysis(desc, location) {
+            const disasterType = detectDisasterType(desc);
+            const severity = detectSeverity(desc);
+            
+            return `🤖 **AI Analysis Results**
+
+**Disaster Type:** ${disasterType}
+**Severity Level:** ${severity}
+**Location:** ${location || 'Location extracted from description'}
+
+**Key Insights:**
+• This appears to be a ${severity.toLowerCase()} priority ${disasterType.toLowerCase()} event
+• Immediate response coordination recommended
+• Resource allocation should focus on emergency services and evacuation support
+• Real-time monitoring of the situation is advised
+
+**Recommended Actions:**
+1. Alert local emergency services
+2. Coordinate with disaster response teams
+3. Monitor social media for additional reports
+4. Prepare evacuation routes if necessary
+
+**Risk Assessment:** Based on the description, this event requires immediate attention and coordinated response efforts.`;
+        }
+
+        function generateSuggestions(desc, location) {
+            return [
+                `Create disaster report for ${location || 'this location'}`,
+                `Monitor social media for updates about this event`,
+                `Check official emergency services for ${location || 'the area'}`,
+                `Set up resource coordination for affected areas`,
+                `Verify information with additional sources`
+            ];
+        }
+
+        // Analyze description
+        async function analyzeDescription() {
+            const description = document.getElementById('description').value.trim();
+            if (!description) return;
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const originalText = analyzeBtn.innerHTML;
+            
+            // Show loading state
+            analyzeBtn.innerHTML = '<span class="loading loading-spinner loading-sm"></span> Analyzing...';
+            analyzeBtn.disabled = true;
+
+            try {
+                // Call backend geocoding API
+                const response = await fetch(`${API_BASE}/geocode`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-user-id': 'netrunnerX'
+                    },
+                    body: JSON.stringify({ description })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to analyze location');
+                }
+
+                const geocodeData = await response.json();
+                
+                // Show results
+                document.getElementById('resultsSection').style.display = 'block';
+                
+                // Display location result
+                const locationContent = document.getElementById('locationContent');
+                locationContent.innerHTML = `
+                    <p class="text-green-300 font-medium">${geocodeData.locationName}</p>
+                    ${geocodeData.coordinates ? `
+                        <div class="text-sm text-gray-300">
+                            <p>Latitude: ${geocodeData.coordinates.lat.toFixed(6)}</p>
+                            <p>Longitude: ${geocodeData.coordinates.lng.toFixed(6)}</p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Source: ${geocodeData.coordinates.source}
+                            </p>
+                        </div>
+                    ` : ''}
+                `;
+
+                // Add marker to map if coordinates are available
+                if (geocodeData.coordinates) {
+                    addMarkerToMap(
+                        geocodeData.coordinates, 
+                        geocodeData.locationName || 'Disaster Location',
+                        description
+                    );
+                }
+
+                // Generate and display AI analysis
+                const analysis = generateMockAnalysis(description, geocodeData.locationName);
+                const aiContent = document.getElementById('aiContent');
+                aiContent.innerHTML = `
+                    <div class="prose prose-invert prose-sm max-w-none">
+                        <pre class="whitespace-pre-wrap text-gray-300 text-sm font-mono bg-black/20 p-4 rounded-lg border border-gray-600/30">${analysis}</pre>
+                    </div>
+                `;
+
+                // Generate and display suggestions
+                const suggestions = generateSuggestions(description, geocodeData.locationName);
+                const suggestionsList = document.getElementById('suggestionsList');
+                suggestionsList.innerHTML = suggestions.map(suggestion => `
+                    <li class="flex items-start gap-2 text-gray-300 text-sm">
+                        <span class="text-yellow-400 mt-1">•</span>
+                        ${suggestion}
+                    </li>
+                `).join('');
+
+            } catch (error) {
+                console.error('Analysis error:', error);
+                
+                // Show error message
+                document.getElementById('resultsSection').style.display = 'block';
+                const aiContent = document.getElementById('aiContent');
+                aiContent.innerHTML = `
+                    <div class="text-red-400">
+                        Error: Unable to analyze the description. Please check your connection and try again.
+                        <br><br>
+                        <small>Make sure the backend server is running on ${API_BASE}</small>
+                    </div>
+                `;
+            } finally {
+                // Reset button
+                analyzeBtn.innerHTML = originalText;
+                analyzeBtn.disabled = false;
+            }
+        }
+
+        // Clear all results
+        function clearAll() {
+            document.getElementById('description').value = '';
+            document.getElementById('resultsSection').style.display = 'none';
+            
+            if (currentMarker) {
+                currentMarker.setMap(null);
+            }
+            if (map) {
+                map.setCenter({ lat: 39.8283, lng: -98.5795 });
+                map.setZoom(4);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Analyze button
+            document.getElementById('analyzeBtn').addEventListener('click', analyzeDescription);
+            
+            // Clear button
+            document.getElementById('clearBtn').addEventListener('click', clearAll);
+            
+            // Sample scenario buttons
+            document.querySelectorAll('.sample-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.querySelector('span').textContent;
+                    document.getElementById('description').value = text;
+                });
+            });
+        });
+
+        // Load Google Maps API
+        function loadGoogleMaps() {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=places&callback=initMap`;
+            script.async = true;
+            script.defer = true;
+            script.onerror = function() {
+                document.getElementById('mapLoading').innerHTML = `
+                    <div class="text-center">
+                        <div class="text-red-400 mb-2">Failed to load Google Maps</div>
+                        <p class="text-gray-400 text-sm">Please check your API key configuration</p>
+                    </div>
+                `;
+                document.getElementById('mapStatus').textContent = 'Map loading failed - check API key';
+            };
+            document.head.appendChild(script);
+        }
+
+        // Initialize
+        loadGoogleMaps();
+    </script>
+</body>
+</html>
